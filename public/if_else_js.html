@@ -1,0 +1,63 @@
+
+</head>
+<body>
+	<h1> How about that JavaScript, eh?</H1>
+	
+<script>	
+var colors = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet'];
+var color = colors[Math.floor(Math.random()*colors.length)];
+
+var favorite = 'blue'; 
+
+// todo: Create a block of if/else statements to check for every color except indigo and violet.
+var message = (color == favorite) ? "Cool! Go Longhorns!" :"What are you, an Aggie?";  //ternary operator...shortened if/else statement
+
+	console.log(color + "? " + message); //console.log is where you test out information in the console.
+
+
+if (color == 'red') 
+{
+	console.log("Red is an energetic color!");
+} else if (	color == 'blue')
+{
+	console.log("Blue is a calming color!");
+} else if (color == 'green')
+{	
+	console.log("Green is the color of balance!");
+}else if (color == 'orange')
+{
+	console.log("Orange is the color of joy and wisdom!");
+}else if (color == 'yellow')
+{
+	console.log("Yellow is the color of intellect!");
+}else if (color == 'indigo')
+{
+	console.log("Indigo is the color of truth, healing, and intuition!");
+}else if (color == 'violet')
+{
+	console.log("Violet is the color of serenity and faith!");
+}
+
+// todo: When a color is encountered log a message that tells the color, and an object of that color.
+//       Example: Blue is the color of the sky.
+
+// todo: Have a final else that will catch indigo and violet.
+// todo: In the else, log: I do not know anything by that color.
+
+// todo: Using the ternary operator, conditionally log a statement that
+//       says whether the random color matches your favorite color.
+
+
+
+		var loggedIn = false;
+		var isAdmin = false;
+
+		if (loggedIn && isAdmin) {
+			console.log("You're logged in and an admin! Good job.");
+		} else if (loggedIn && !isAdmin) {
+			console.log("You're logged in but not an admin! Don't mess around.");
+		} else {
+			console.log("You aren't logged in, go away.");
+	}
+</script>
+</body>
