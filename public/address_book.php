@@ -1,21 +1,52 @@
 <?php
-$address_book = [
-    ['The White House', '1600 Pennsylvania Avenue NW', 'Washington', 'DC', '20500', 'phone number'],
-    ['Marvel Comics', 'P.O. Box 1527', 'Long Island City', 'NY', '11101', 'phone number'],
-    ['LucasArts', 'P.O. Box 29901', 'San Francisco', 'CA', '94129-0901', 'phone number']
-];
-$filename = "data/address_book.csv";
+// $address_book = [];
+// $filename = "";
 
-function write_save_file($filename, $empty_array)//created function - Chris Turner
-{
-    if(is_writeable($filename)){
-      $handle = fopen($filename, 'w');
-    foreach($empty_array as $subArray){
-        fputcsv($handle, $subArray);  
+class AddressDataStore{
+    public $filename = 'data/address_book.csv';
+
+    public function read_address_book()
+    {
+        $handle = fopen($this->filename, 'r');
+        $address_book= [];
+
+        while(!feof($handle)){
+            $row = fgetcsv($handle);
+            if(is_array($row)){
+                $address_book[] = $row;
+            }
+        }
+        fclose($handle);
+        return $address_book;
     }
-    fclose($handle);
+
+    public function write_address_book($addresses_array)
+    {
+        if(is_writeable($this->filename)){
+            $handle = fopen($this->filename, 'w');
+            foreach($addresses_array as $subArray){
+                fputcsv($handle, $subArray);  
+            }
+    
+        }
+        fclose($handle);
     }
 }
+
+$address_book = new AddressDataStore;
+
+// Set var to array from object method
+$address_data = $address_book->read_address_book();
+
+
+if(isset($_GET['id'])){ //getting the information from the url ?id= the key number from the array that is getting deleted
+    unset($address_data[$_GET['id']]);//delete an item from the array
+    $address_book->write_address_book($address_data);
+    //after deleting saving the address_book.csv
+    header("location: address_book.php");//redirecting to the file location
+    exit;
+}
+
 // if (!empty($_POST)){
 //     $new_address = []; //this is an empty array for us to add to...initialize it
 //     //$new_address [] = $_POST['name'];
@@ -27,8 +58,7 @@ function write_save_file($filename, $empty_array)//created function - Chris Turn
 // $errors = [];
 
 $new_address = [];//empty array
-if(!empty($_POST)){
-    $errors = [];
+if (!empty($_POST['name']) && !empty($_POST['address']) && !empty($_POST['city']) && !empty($_POST['state']) && !empty($_POST['zip'])) {
 
     $new_address ['name'] = $_POST['name'];
     $new_address ['address'] = $_POST['address'];
@@ -36,29 +66,17 @@ if(!empty($_POST)){
     $new_address ['state'] = $_POST['state'];
     $new_address ['zip'] = $_POST['zip'];
     $new_address ['phone'] = $_POST['phone'];
-
-    foreach($new_address as $key => $value){
+    
+    array_push($address_data, $new_address);
+    $address_book->write_address_book($address_data);
+}
+else{
+   foreach($new_address as $key => $value){
         if (empty($value)){
-            echo ucfirst($key) . " is required." . PHP_EOL;
+            echo ucfirst($key) . " is required." . PHP_EOL; 
         }
     }
-   // var_dump($new_address);
 }
-
-//foreach($new_address as $key => $error){
-//     if (empty($error)){
-//         $errors[] = ucfirst($key) . " is not found.";
-//     }else{
-//         $entries [] = $error;
-//     }
-// }
-//$mergedArray = array_push($address_book, $new_address);
-$mergedArray = array_merge_recursive($address_book, $new_address);
-//var_dump($new_address);
-var_dump($mergedArray);
-
-
-write_save_file($filename, $address_book);
 
 ?>
 
@@ -78,11 +96,14 @@ write_save_file($filename, $address_book);
         <th>Zip</th>
         <th>Phone</th>
     </tr>
-<? foreach($mergedArray as $subArray): ?>
+<? foreach($address_data as $key => $subArray): ?>
     <tr>
        <? foreach ($subArray as $value) : ?>
-            <td><?= $value; ?></td>
+            <td><?= htmlspecialchars(strip_tags($value)); ?>
+            </td>
         <? endforeach; ?>
+            <td><a href = "?id=<?=$key;?>">Delete Contact</a></td>
+    </tr>
 <?endforeach;?>
 </table>
 <? //var_dump($address_book);?>
