@@ -16,24 +16,29 @@ if(isset($_GET['id'])){ //getting the information from the url ?id= the key numb
     exit;
 }
 $new_address = [];//empty array for adding address input
-if (isset($_POST['name']) && isset($_POST['address']) && isset($_POST['city']) && isset($_POST['state']) && isset($_POST['zip'])) {
+try{
+    if (isset($_POST['name']) && isset($_POST['address']) && isset($_POST['city']) && isset($_POST['state']) && isset($_POST['zip'])) {
     
-    $new_address ['name'] = $_POST['name'];
-    $new_address ['address'] = $_POST['address'];
-    $new_address ['city'] = $_POST['city'];
-    $new_address ['state'] = $_POST['state'];
-    $new_address ['zip'] = $_POST['zip'];
-    $new_address ['phone'] = $_POST['phone'];
+        $new_address ['name'] = $_POST['name'];
+        $new_address ['address'] = $_POST['address'];
+        $new_address ['city'] = $_POST['city'];
+        $new_address ['state'] = $_POST['state'];
+        $new_address ['zip'] = $_POST['zip'];
+        $new_address ['phone'] = $_POST['phone'];
 
-    foreach($new_address as $key => $value){
-        if (strlen($value) == 0 || strlen($value) > 125){
-            throw new Exception('Invalid entry! Please make input greater than 0 characters and less than 240 characters!'); 
+        foreach($new_address as $key => $value){
+            if (strlen($value) == 0 || strlen($value) > 125){
+             throw new Exception('Invalid entry! Please make input greater than 0 characters and less than 240 characters!'); 
+            }
         }
     }
-
+}catch(Exception $e){
+    $errorMessage = "Please check your entry to make sure it is greater than 0 characters long and less than 240 characthers!";
+}
     array_push($address_data, $new_address);
     $address_book->write($address_book1);
-}
+
+
 //only gets used when a file is uploaded to the form method
 if (count($_FILES) > 0 && $_FILES['UploadFile1']['error'] == 0) {
 
@@ -68,6 +73,9 @@ if (count($_FILES) > 0 && $_FILES['UploadFile1']['error'] == 0) {
 </head>
 <h1>Address Book</h1>
 <body>
+    <? if(isset ($errorMessage)): ?>
+    <?= "<p>$errorMessage</p>"; ?>
+<? endif; ?>
 <table>
     <tr>
         <th>Name</th>
