@@ -1,85 +1,66 @@
 <?php
-// $address_book = [];
-// $filename = "";
 
-class AddressDataStore{
-    public $filename = 'data/address_book.csv';
+require_once('classes-Objects/Address_Data_Store_Class.php');
 
-    public function read_address_book()
-    {
-        $handle = fopen($this->filename, 'r');
-        $address_book= [];
+$address_book1 = [];
 
-        while(!feof($handle)){
-            $row = fgetcsv($handle);
-            if(is_array($row)){
-                $address_book[] = $row;
-            }
-        }
-        fclose($handle);
-        return $address_book;
-    }
+$address_book = new AddressDataStore("data/address_book.csv"); // Set variable name to array from object method
 
-    public function write_address_book($addresses_array)
-    {
-        if(is_writeable($this->filename)){
-            $handle = fopen($this->filename, 'w');
-            foreach($addresses_array as $subArray){
-                fputcsv($handle, $subArray);  
-            }
-    
-        }
-        fclose($handle);
-    }
-}
-
-$address_book = new AddressDataStore;
-
-// Set var to array from object method
-$address_data = $address_book->read_address_book();
-
+$address_data = $address_book->read(); //
 
 if(isset($_GET['id'])){ //getting the information from the url ?id= the key number from the array that is getting deleted
     unset($address_data[$_GET['id']]);//delete an item from the array
-    $address_book->write_address_book($address_data);
+    $address_book->write($address_book1);
     //after deleting saving the address_book.csv
     header("location: address_book.php");//redirecting to the file location
     exit;
 }
-
-// if (!empty($_POST)){
-//     $new_address = []; //this is an empty array for us to add to...initialize it
-//     //$new_address [] = $_POST['name'];
-//     foreach ($_POST as $key => $value){
-        
-//         $new_address[] = $value;
-//     }
-// }
-// $errors = [];
-
-$new_address = [];//empty array
-if (!empty($_POST['name']) && !empty($_POST['address']) && !empty($_POST['city']) && !empty($_POST['state']) && !empty($_POST['zip'])) {
-
+$new_address = [];//empty array for adding address input
+if (isset($_POST['name']) && isset($_POST['address']) && isset($_POST['city']) && isset($_POST['state']) && isset($_POST['zip'])) {
+    
     $new_address ['name'] = $_POST['name'];
     $new_address ['address'] = $_POST['address'];
     $new_address ['city'] = $_POST['city'];
     $new_address ['state'] = $_POST['state'];
     $new_address ['zip'] = $_POST['zip'];
     $new_address ['phone'] = $_POST['phone'];
-    
-    array_push($address_data, $new_address);
-    $address_book->write_address_book($address_data);
-}
-else{
-   foreach($new_address as $key => $value){
-        if (empty($value)){
-            echo ucfirst($key) . " is required." . PHP_EOL; 
+
+    foreach($new_address as $key => $value){
+        if (strlen($value) == 0 || strlen($value) > 125){
+            throw new Exception('Invalid entry! Please make input greater than 0 characters and less than 240 characters!'); 
         }
     }
+
+    array_push($address_data, $new_address);
+    $address_book->write($address_book1);
 }
+//only gets used when a file is uploaded to the form method
+if (count($_FILES) > 0 && $_FILES['UploadFile1']['error'] == 0) {
 
+    if ($_FILES['UploadFile1']['type']!= 'text/csv'){
+        echo "ERROR: file must be in text/csv!";
+    } else {
+        //set the destination directory for uploads
+        //Grab the filename from the uploaded file by using basename
+        $upload_dir = '/vagrant/sites/codeup.dev/public/uploads/';
+        // Grab the filename from the uploaded file by using basename
+        $Uploadfilename = basename($_FILES['UploadFile1']['name']);
+        // Create the saved filename using the file's original name and our upload directory
+        $saved_filename = $upload_dir . $Uploadfilename;
+        // Move the file from the temp location to our uploads directory
+        move_uploaded_file($_FILES['UploadFile1']['tmp_name'], $saved_filename);
+
+        // Check if we saved a file
+        $newAddressFile = new AddressDataStore($saved_filename);
+    
+        $newFile = $newAddressFile->read(); 
+        //$newFile was created as the placeholder for the new array to be merged with my master array $todo
+    
+        $address_book = array_merge($address_book, $newFile);//this is the merging of the the newfile with the master array
+        $address_book->write($address_book1);
+    }
+}
 ?>
-
 <!DOCTYPE html>
 <head>
 	<meta charset="utf-8">
@@ -107,7 +88,7 @@ else{
 <?endforeach;?>
 </table>
 <? //var_dump($address_book);?>
-<? //var_dump($_POST);?>
+<? //var_dump($_POST);?> 
 
 <h1>Sign Up Here!</h1>
 
@@ -134,5 +115,22 @@ else{
 <br>
 <input type= "submit" value = "Submit">
 
+<h1>Upload File</h1>
+
+<form method="POST" enctype="multipart/form-data">
+    <p>
+        <label for="UploadFile1">File to upload:</label>
+        <input id="UploadFile1" name="UploadFile1" type="file" accept=".csv">
+    </p>
+    <p>
+        <input type="Submit" value="Upload File">
+    </p>
+</form>
 </body>
 </html>
+
+
+
+
+
+
