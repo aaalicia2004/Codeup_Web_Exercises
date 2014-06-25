@@ -38,5 +38,6 @@ $query3 = 'CREATE TABLE contact_has_address (
 $dbc->exec($query3);
 
 //NOTES: 
-//ON DELETE CASCADE will delete the id's in the contact_has_address table when it has been removed from either the contacts table or the addresses table
+//Created 3 different queries to represent each table created in the address book database
+//query number 3--ON DELETE CASCADE will delete the id's in the contact_has_address table when it has been removed from either the contacts table or the addresses table
 ?>
